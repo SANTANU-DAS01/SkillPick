@@ -1,126 +1,145 @@
-"use client"
+"use client";
 
-import { useState, useEffect, useContext } from "react"
-import { useParams, Link, useNavigate } from "react-router-dom"
-import { toast } from "react-hot-toast"
-import api from "../utils/api"
-import AuthContext from "../context/AuthContext"
-import { ArrowLeft, Download, Star, User, Calendar, Tag, BookOpen, Edit, Trash, FileText } from "lucide-react"
+import { useState, useEffect, useContext } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { toast } from "react-hot-toast";
+import api from "../utils/api";
+import AuthContext from "../context/AuthContext";
+import {
+  ArrowLeft,
+  Download,
+  Star,
+  User,
+  Calendar,
+  Tag,
+  BookOpen,
+  Edit,
+  Trash,
+  FileText,
+} from "lucide-react";
 
 const BookDetails = () => {
-  const { id } = useParams()
-  const navigate = useNavigate()
-  const { user, isAuthenticated } = useContext(AuthContext)
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { user, isAuthenticated } = useContext(AuthContext);
 
-  const [book, setBook] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-  const [reviewText, setReviewText] = useState("")
-  const [reviewRating, setReviewRating] = useState(5)
-  const [submittingReview, setSubmittingReview] = useState(false)
+  const [book, setBook] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [reviewText, setReviewText] = useState("");
+  const [reviewRating, setReviewRating] = useState(5);
+  const [submittingReview, setSubmittingReview] = useState(false);
 
   useEffect(() => {
-    fetchBook()
-  }, [id])
+    fetchBook();
+  }, [id]);
 
   const fetchBook = async () => {
     try {
-      setLoading(true)
-      const res = await api.get(`/api/books/${id}`)
-      setBook(res.data.data)
+      setLoading(true);
+      const res = await api.get(`/api/books/${id}`);
+      setBook(res.data.data);
     } catch (err) {
-      setError("Failed to fetch book details. Please try again later.")
-      console.error("Error fetching book:", err)
+      setError("Failed to fetch book details. Please try again later.");
+      console.error("Error fetching book:", err);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handlePurchase = async () => {
     if (!isAuthenticated) {
-      toast.error("Please login to purchase this book")
-      navigate("/login")
-      return
+      toast.error("Please login to purchase this book");
+      navigate("/login");
+      return;
     }
 
     try {
-      const res = await api.post(`/api/books/${id}/purchase`)
-      toast.success("Book purchased successfully!")
+      const res = await api.post(`/api/books/${id}/purchase`);
+      toast.success("Book purchased successfully!");
 
       // Update the user context to include this book in purchasedBooks
-      if (user && user.purchasedBooks && !user.purchasedBooks.includes(book._id)) {
+      if (
+        user &&
+        user.purchasedBooks &&
+        !user.purchasedBooks.includes(book._id)
+      ) {
         user.purchasedBooks.push(book._id);
       }
 
       // Update book state to reflect purchase immediately
       setBook((prevBook) => ({
         ...prevBook,
-        purchased: true
-      }))
+        purchased: true,
+      }));
     } catch (err) {
-      toast.error(err.response?.data?.error || "Failed to purchase book")
+      toast.error(err.response?.data?.error || "Failed to purchase book");
     }
-  }
+  };
 
   const handleSubmitReview = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!isAuthenticated) {
-      toast.error("Please login to submit a review")
-      navigate("/login")
-      return
+      toast.error("Please login to submit a review");
+      navigate("/login");
+      return;
     }
 
     if (!reviewText.trim()) {
-      toast.error("Please enter a review")
-      return
+      toast.error("Please enter a review");
+      return;
     }
 
     try {
-      setSubmittingReview(true)
+      setSubmittingReview(true);
       await api.post(`/api/books/${id}/reviews`, {
         rating: reviewRating,
         text: reviewText,
-      })
-      toast.success("Review submitted successfully!")
-      setReviewText("")
-      setReviewRating(5)
-      fetchBook() // Refresh book data with new review
+      });
+      toast.success("Review submitted successfully!");
+      setReviewText("");
+      setReviewRating(5);
+      fetchBook(); // Refresh book data with new review
     } catch (err) {
-      toast.error(err.response?.data?.error || "Failed to submit review")
+      toast.error(err.response?.data?.error || "Failed to submit review");
     } finally {
-      setSubmittingReview(false)
+      setSubmittingReview(false);
     }
-  }
+  };
 
   const handleDeleteBook = async () => {
-    if (window.confirm("Are you sure you want to delete this book? This action cannot be undone.")) {
+    if (
+      window.confirm(
+        "Are you sure you want to delete this book? This action cannot be undone.",
+      )
+    ) {
       try {
-        await api.delete(`/api/books/${id}`)
-        toast.success("Book deleted successfully")
-        navigate("/admin/books")
+        await api.delete(`/api/books/${id}`);
+        toast.success("Book deleted successfully");
+        navigate("/admin/books");
       } catch (err) {
-        toast.error(err.response?.data?.error || "Failed to delete book")
+        toast.error(err.response?.data?.error || "Failed to delete book");
       }
     }
-  }
+  };
 
   // Function to handle file download or viewing
   const handleFileAccess = (e) => {
     // For PDFs, open in a new tab instead of downloading directly
-    if (book.format && book.format.toLowerCase() === 'pdf') {
-      e.preventDefault()
-      window.open(book.fileUrl, '_blank')
+    if (book.format && book.format.toLowerCase() === "pdf") {
+      e.preventDefault();
+      window.open(book.fileUrl, "_blank");
     }
     // For other file types, the default download behavior will work
-  }
+  };
 
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
       </div>
-    )
+    );
   }
 
   if (error || !book) {
@@ -129,28 +148,39 @@ const BookDetails = () => {
         <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-6">
           <div className="flex">
             <div className="ml-3">
-              <p className="text-sm text-red-700">{error || "Book not found"}</p>
+              <p className="text-sm text-red-700">
+                {error || "Book not found"}
+              </p>
             </div>
           </div>
         </div>
-        <Link to="/books" className="inline-flex items-center text-indigo-600 hover:text-indigo-500">
+        <Link
+          to="/books"
+          className="inline-flex items-center text-indigo-600 hover:text-indigo-500"
+        >
           <ArrowLeft className="h-5 w-5 mr-2" />
           Back to Books
         </Link>
       </div>
-    )
+    );
   }
 
-  const isOwner = user && (user.id === book.createdBy._id || user.role === "admin")
-  const hasAlreadyReviewed = book.reviews.some((review) => review.user._id === user?.id)
-  const hasPurchased = user?.purchasedBooks?.includes(book._id) || book.isFree
-  const isPdf = book.format && book.format.toLowerCase() === 'pdf'
+  const isOwner =
+    user && (user.id === book.createdBy._id || user.role === "admin");
+  const hasAlreadyReviewed = book.reviews.some(
+    (review) => review.user._id === user?.id,
+  );
+  const hasPurchased = user?.purchasedBooks?.includes(book._id) || book.isFree;
+  const isPdf = book.format && book.format.toLowerCase() === "pdf";
 
   return (
     <div className="bg-gray-50 min-h-screen py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-6">
-          <Link to="/books" className="inline-flex items-center text-indigo-600 hover:text-indigo-500">
+          <Link
+            to="/books"
+            className="inline-flex items-center text-indigo-600 hover:text-indigo-500"
+          >
             <ArrowLeft className="h-5 w-5 mr-2" />
             Back to Books
           </Link>
@@ -165,17 +195,18 @@ const BookDetails = () => {
                 alt={book.title}
                 className="w-full max-w-xs rounded-lg shadow-md object-cover"
               />
-
             </div>
 
             {/* Book Details */}
             <div className="md:col-span-2 p-6">
               <div className="flex justify-between items-start">
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">{book.title}</h1>
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                  {book.title}
+                </h1>
                 <span
                   className={`px-3 py-1 text-sm font-medium rounded-full ${book.isFree ? "bg-green-100 text-green-800" : "bg-indigo-100 text-indigo-800"}`}
                 >
-                  {book.isFree ? "Free" : `₹${book.price}`}
+                  Free
                 </span>
               </div>
 
@@ -184,9 +215,12 @@ const BookDetails = () => {
               <div className="flex items-center mb-6">
                 <div className="flex items-center mr-4">
                   <Star className="h-5 w-5 text-yellow-400" />
-                  <span className="ml-1 text-gray-700">{book.rating ? book.rating.toFixed(1) : "No ratings yet"}</span>
+                  <span className="ml-1 text-gray-700">
+                    {book.rating ? book.rating.toFixed(1) : "No ratings yet"}
+                  </span>
                   <span className="ml-1 text-gray-500">
-                    ({book.reviews.length} {book.reviews.length === 1 ? "review" : "reviews"})
+                    ({book.reviews.length}{" "}
+                    {book.reviews.length === 1 ? "review" : "reviews"})
                   </span>
                 </div>
 
@@ -197,22 +231,28 @@ const BookDetails = () => {
               </div>
 
               <div className="mb-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-2">Description</h2>
-                <p className="text-gray-700 whitespace-pre-line">{book.description}</p>
+                <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                  Description
+                </h2>
+                <p className="text-gray-700 whitespace-pre-line">
+                  {book.description}
+                </p>
               </div>
 
               <div className="grid grid-cols-2 gap-4 mb-8">
                 <div className="flex items-center">
                   <Tag className="h-5 w-5 text-indigo-500 mr-2" />
                   <span className="text-gray-700">
-                    <span className="font-medium">Category:</span> {book.category}
+                    <span className="font-medium">Category:</span>{" "}
+                    {book.category}
                   </span>
                 </div>
 
                 <div className="flex items-center">
                   <Calendar className="h-5 w-5 text-indigo-500 mr-2" />
                   <span className="text-gray-700">
-                    <span className="font-medium">Published:</span> {new Date(book.createdAt).toLocaleDateString()}
+                    <span className="font-medium">Published:</span>{" "}
+                    {new Date(book.createdAt).toLocaleDateString()}
                   </span>
                 </div>
               </div>
@@ -221,14 +261,18 @@ const BookDetails = () => {
                 {hasPurchased ? (
                   <a
                     href={book.fileUrl}
-                    download={`${book.title}.${book.format || 'pdf'}`}
+                    download={`${book.title}.${book.format || "pdf"}`}
                     target={isPdf ? "_blank" : "_self"}
                     rel="noopener noreferrer"
                     className="inline-flex items-center px-4 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                     onClick={handleFileAccess}
                   >
-                    {isPdf ? <FileText className="h-5 w-5 mr-2" /> : <Download className="h-5 w-5 mr-2" />}
-                    {isPdf ? 'View PDF' : 'Download Book'}
+                    {isPdf ? (
+                      <FileText className="h-5 w-5 mr-2" />
+                    ) : (
+                      <Download className="h-5 w-5 mr-2" />
+                    )}
+                    {isPdf ? "View PDF" : "Download Book"}
                   </a>
                 ) : (
                   <button
@@ -271,10 +315,15 @@ const BookDetails = () => {
           {/* Add Review Form */}
           {isAuthenticated && !hasAlreadyReviewed && (
             <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Add Your Review</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Add Your Review
+              </h3>
               <form onSubmit={handleSubmitReview}>
                 <div className="mb-4">
-                  <label htmlFor="rating" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label
+                    htmlFor="rating"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                  >
                     Rating
                   </label>
                   <select
@@ -292,7 +341,10 @@ const BookDetails = () => {
                 </div>
 
                 <div className="mb-4">
-                  <label htmlFor="review" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label
+                    htmlFor="review"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                  >
                     Your Review
                   </label>
                   <textarea
@@ -320,15 +372,22 @@ const BookDetails = () => {
           {book.reviews.length > 0 ? (
             <div className="space-y-6">
               {book.reviews.map((review) => (
-                <div key={review._id} className="bg-white rounded-lg shadow-md p-6">
+                <div
+                  key={review._id}
+                  className="bg-white rounded-lg shadow-md p-6"
+                >
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex items-center">
                       <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold mr-3">
                         {review.user.name.charAt(0).toUpperCase()}
                       </div>
                       <div>
-                        <h4 className="text-lg font-medium text-gray-900">{review.user.name}</h4>
-                        <p className="text-sm text-gray-500">{new Date(review.createdAt).toLocaleDateString()}</p>
+                        <h4 className="text-lg font-medium text-gray-900">
+                          {review.user.name}
+                        </h4>
+                        <p className="text-sm text-gray-500">
+                          {new Date(review.createdAt).toLocaleDateString()}
+                        </p>
                       </div>
                     </div>
                     <div className="flex items-center">
@@ -346,13 +405,15 @@ const BookDetails = () => {
             </div>
           ) : (
             <div className="bg-white rounded-lg shadow-md p-6 text-center">
-              <p className="text-gray-500">No reviews yet. Be the first to review this book!</p>
+              <p className="text-gray-500">
+                No reviews yet. Be the first to review this book!
+              </p>
             </div>
           )}
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default BookDetails
+export default BookDetails;

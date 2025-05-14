@@ -1,38 +1,44 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Link } from "react-router-dom"
-import api from "../utils/api"
-import { BookOpen, Search, ChevronRight } from "lucide-react"
-import HeroBG from "../assets/upscalemedia-transformed.jpeg"
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import api from "../utils/api";
+import { BookOpen, Search, ChevronRight } from "lucide-react";
+import HeroBG from "../assets/upscalemedia-transformed.jpeg";
 const Home = () => {
-  const [featuredBooks, setFeaturedBooks] = useState([])
-  const [categories, setCategories] = useState(["Computer Science", "Electrical", "Mechanical", "Civil", "Electronics"])
-  const [semesters, setSemesters] = useState([1, 2, 3, 4, 5, 6])
-  const [loading, setLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState("")
+  const [featuredBooks, setFeaturedBooks] = useState([]);
+  const [categories, setCategories] = useState([
+    "Computer Science",
+    "Electrical",
+    "Mechanical",
+    "Civil",
+    "Electronics",
+  ]);
+  const [semesters, setSemesters] = useState([1, 2, 3, 4, 5, 6]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     const fetchFeaturedBooks = async () => {
       try {
-        const res = await api.get("/api/books?limit=6")
-        setFeaturedBooks(res.data.data)
+        const res = await api.get("/api/books?limit=6");
+        setFeaturedBooks(res.data.data);
       } catch (error) {
-        console.error("Error fetching books:", error)
+        console.error("Error fetching books:", error);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchFeaturedBooks()
-  }, [])
+    fetchFeaturedBooks();
+  }, []);
 
   const handleSearch = (e) => {
-    e.preventDefault()
+    e.preventDefault();
     if (searchTerm.trim()) {
-      window.location.href = `/books?search=${encodeURIComponent(searchTerm)}`
+      window.location.href = `/books?search=${encodeURIComponent(searchTerm)}`;
     }
-  }
+  };
 
   return (
     <div className="bg-white">
@@ -50,8 +56,8 @@ const Home = () => {
             Diploma Books for West Bengal Students
           </h1>
           <p className="mt-6 text-xl text-indigo-100 max-w-3xl">
-            Access all your semester books in one place. Browse through our collection of books for all streams of
-            Diploma in West Bengal.
+            Access all your semester books in one place. Browse through our
+            collection of books for all streams of Diploma in West Bengal.
           </p>
 
           <div className="mt-10 max-w-xl">
@@ -85,7 +91,10 @@ const Home = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="flex items-center justify-between mb-8">
           <h2 className="text-3xl font-bold text-gray-900">Featured Books</h2>
-          <Link to="/books" className="text-indigo-600 hover:text-indigo-500 flex items-center">
+          <Link
+            to="/books"
+            className="text-indigo-600 hover:text-indigo-500 flex items-center"
+          >
             View all books
             <ChevronRight className="ml-1 h-5 w-5" />
           </Link>
@@ -104,24 +113,32 @@ const Home = () => {
               >
                 <div className="h-48 overflow-hidden">
                   <img
-                    src={book.coverImage || "/placeholder.svg?height=300&width=400"}
+                    src={
+                      book.coverImage || "/placeholder.svg?height=300&width=400"
+                    }
                     alt={book.title}
                     className="w-full h-full object-cover"
                   />
                 </div>
                 <div className="p-6">
                   <div className="flex justify-between items-start">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">{book.title}</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      {book.title}
+                    </h3>
                     <span
                       className={`px-2 py-1 text-xs font-medium rounded-full ${book.isFree ? "bg-green-100 text-green-800" : "bg-indigo-100 text-indigo-800"}`}
                     >
-                      {book.isFree ? "Free" : `₹${book.price}`}
+                      Free
                     </span>
                   </div>
                   <p className="text-sm text-gray-600 mb-2">By {book.author}</p>
-                  <p className="text-sm text-gray-500 mb-4 line-clamp-2">{book.description}</p>
+                  <p className="text-sm text-gray-500 mb-4 line-clamp-2">
+                    {book.description}
+                  </p>
                   <div className="flex justify-between items-center">
-                    <span className="text-xs font-medium text-gray-500">{book.category}</span>
+                    <span className="text-xs font-medium text-gray-500">
+                      {book.category}
+                    </span>
                     <Link
                       to={`/books/${book._id}`}
                       className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200"
@@ -139,7 +156,9 @@ const Home = () => {
       {/* Browse by Category Section */}
       <div className="bg-gray-50 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8">Browse by Category</h2>
+          <h2 className="text-3xl font-bold text-gray-900 mb-8">
+            Browse by Category
+          </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {categories.map((category) => (
               <Link
@@ -149,8 +168,12 @@ const Home = () => {
               >
                 <BookOpen className="h-8 w-8 text-indigo-600 mr-4" />
                 <div>
-                  <h3 className="text-lg font-medium text-gray-900">{category}</h3>
-                  <p className="text-sm text-gray-500">Browse all {category} books</p>
+                  <h3 className="text-lg font-medium text-gray-900">
+                    {category}
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    Browse all {category} books
+                  </p>
                 </div>
               </Link>
             ))}
@@ -160,7 +183,9 @@ const Home = () => {
 
       {/* Browse by Semester Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <h2 className="text-3xl font-bold text-gray-900 mb-8">Browse by Semester</h2>
+        <h2 className="text-3xl font-bold text-gray-900 mb-8">
+          Browse by Semester
+        </h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
           {semesters.map((semester) => (
             <Link
@@ -180,7 +205,9 @@ const Home = () => {
         <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:py-16 lg:px-8 lg:flex lg:items-center lg:justify-between">
           <h2 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
             <span className="block">Ready to dive in?</span>
-            <span className="block text-indigo-200">Start exploring our collection today.</span>
+            <span className="block text-indigo-200">
+              Start exploring our collection today.
+            </span>
           </h2>
           <div className="mt-8 flex lg:mt-0 lg:flex-shrink-0">
             <div className="inline-flex rounded-md shadow">
@@ -203,7 +230,7 @@ const Home = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Home
+export default Home;
