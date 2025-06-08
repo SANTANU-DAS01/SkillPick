@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useLocation, Link } from "react-router-dom";
+import { useLocation, useNavigate, Link } from "react-router-dom";
 import api from "../utils/api";
 import { Search, Filter, ChevronDown, Star, X } from "lucide-react";
 
 const AllBooks = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const queryParams = new URLSearchParams(location.search);
 
   const [books, setBooks] = useState([]);
@@ -18,45 +19,16 @@ const AllBooks = () => {
     total: 0,
   });
 
-  // Filters
   const [searchTerm, setSearchTerm] = useState(queryParams.get("search") || "");
-  const [selectedStream, setSelectedStream] = useState(
-    queryParams.get("stream") || "",
-  );
-  const [selectedSemester, setSelectedSemester] = useState(
-    queryParams.get("semester") || "",
-  );
+  const [selectedStream, setSelectedStream] = useState(queryParams.get("stream") || "");
+  const [selectedSemester, setSelectedSemester] = useState(queryParams.get("semester") || "");
   const [priceFilter, setPriceFilter] = useState(queryParams.get("free") || "");
   const [showFilters, setShowFilters] = useState(false);
 
   const streams = [
-    "All",
-    "PHO",
-    "DP",
-    "ARCH",
-    "FWT",
-    "CST",
-    "ME",
-    "CE",
-    "SE",
-    "CFS",
-    "EE",
-    "ETCE",
-    "CAU",
-    "CSE",
-    "CSWT",
-    "IT",
-    "ETE",
-    "ICE",
-    "ECE",
-    "LGT",
-    "MEP",
-    "GIS & GPS",
-    "EEIC",
-    "EEPS",
-    "EEE",
-    "MOPM",
-    "TT",
+    "All", "PHO", "DP", "ARCH", "FWT", "CST", "ME", "CE", "SE", "CFS", "EE", "ETCE", "CAU",
+    "CSE", "CSWT", "IT", "ETE", "ICE", "ECE", "LGT", "MEP", "GIS & GPS", "EEIC", "EEPS",
+    "EEE", "MOPM", "TT",
   ];
   const semesters = [1, 2, 3, 4, 5, 6];
 
@@ -70,9 +42,7 @@ const AllBooks = () => {
       const params = new URLSearchParams(location.search);
       const page = params.get("page") || 1;
 
-      const res = await api.get(
-        `/api/books?${params.toString()}&page=${page}&limit=12`,
-      );
+      const res = await api.get(`/api/books?${params.toString()}&page=${page}&limit=12`);
       setBooks(res.data.data);
       setPagination({
         page: Number.parseInt(page),
@@ -94,13 +64,12 @@ const AllBooks = () => {
 
   const applyFilters = () => {
     const params = new URLSearchParams();
-
     if (searchTerm) params.append("search", searchTerm);
     if (selectedStream) params.append("stream", selectedStream);
     if (selectedSemester) params.append("semester", selectedSemester);
     if (priceFilter) params.append("free", priceFilter);
 
-    window.location.href = `/books?${params.toString()}`;
+    navigate(`/books?${params.toString()}`);
   };
 
   const clearFilters = () => {
@@ -108,23 +77,20 @@ const AllBooks = () => {
     setSelectedStream("");
     setSelectedSemester("");
     setPriceFilter("");
-    window.location.href = "/books";
+    navigate("/books");
   };
 
   const handlePageChange = (page) => {
     const params = new URLSearchParams(location.search);
     params.set("page", page);
-    window.location.href = `/books?${params.toString()}`;
+    navigate(`/books?${params.toString()}`);
   };
 
   return (
     <div className="bg-gray-50 min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4 md:mb-0">
-            Browse Books
-          </h1>
-
+          <h1 className="text-3xl font-bold text-gray-900 mb-4 md:mb-0">Browse Books</h1>
           <button
             onClick={() => setShowFilters(!showFilters)}
             className="flex items-center text-indigo-600 hover:text-indigo-500 md:hidden"
@@ -135,17 +101,12 @@ const AllBooks = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Filters Sidebar */}
-          <div
-            className={`lg:col-span-1 ${showFilters ? "block" : "hidden"} lg:block`}
-          >
+          {/* Filters */}
+          <div className={`lg:col-span-1 ${showFilters ? "block" : "hidden"} lg:block`}>
             <div className="bg-white rounded-lg shadow-md p-6 sticky top-8">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-semibold text-gray-900">Filters</h2>
-                <button
-                  onClick={clearFilters}
-                  className="text-sm text-indigo-600 hover:text-indigo-500 flex items-center"
-                >
+                <button onClick={clearFilters} className="text-sm text-indigo-600 hover:text-indigo-500 flex items-center">
                   <X className="h-4 w-4 mr-1" />
                   Clear all
                 </button>
@@ -153,12 +114,7 @@ const AllBooks = () => {
 
               <form onSubmit={handleSearch}>
                 <div className="mb-6">
-                  <label
-                    htmlFor="search"
-                    className="block text-sm font-medium text-gray-700 mb-2"
-                  >
-                    Search
-                  </label>
+                  <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-2">Search</label>
                   <div className="relative">
                     <input
                       type="text"
@@ -175,12 +131,7 @@ const AllBooks = () => {
                 </div>
 
                 <div className="mb-6">
-                  <label
-                    htmlFor="stream"
-                    className="block text-sm font-medium text-gray-700 mb-2"
-                  >
-                    Stream
-                  </label>
+                  <label htmlFor="stream" className="block text-sm font-medium text-gray-700 mb-2">Stream</label>
                   <select
                     id="stream"
                     value={selectedStream}
@@ -189,20 +140,13 @@ const AllBooks = () => {
                   >
                     <option value="">All Streams</option>
                     {streams.map((stream) => (
-                      <option key={stream} value={stream}>
-                        {stream}
-                      </option>
+                      <option key={stream} value={stream}>{stream}</option>
                     ))}
                   </select>
                 </div>
 
                 <div className="mb-6">
-                  <label
-                    htmlFor="semester"
-                    className="block text-sm font-medium text-gray-700 mb-2"
-                  >
-                    Semester
-                  </label>
+                  <label htmlFor="semester" className="block text-sm font-medium text-gray-700 mb-2">Semester</label>
                   <select
                     id="semester"
                     value={selectedSemester}
@@ -211,17 +155,13 @@ const AllBooks = () => {
                   >
                     <option value="">All Semesters</option>
                     {semesters.map((semester) => (
-                      <option key={semester} value={semester}>
-                        Semester {semester}
-                      </option>
+                      <option key={semester} value={semester}>Semester {semester}</option>
                     ))}
                   </select>
                 </div>
 
                 <div className="mb-6">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Price
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Price</label>
                   <div className="space-y-2">
                     <div className="flex items-center">
                       <input
@@ -232,12 +172,7 @@ const AllBooks = () => {
                         onChange={() => setPriceFilter("")}
                         className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
                       />
-                      <label
-                        htmlFor="price-all"
-                        className="ml-3 text-sm text-gray-700"
-                      >
-                        All
-                      </label>
+                      <label htmlFor="price-all" className="ml-3 text-sm text-gray-700">All</label>
                     </div>
                     <div className="flex items-center">
                       <input
@@ -248,12 +183,7 @@ const AllBooks = () => {
                         onChange={() => setPriceFilter("true")}
                         className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
                       />
-                      <label
-                        htmlFor="price-free"
-                        className="ml-3 text-sm text-gray-700"
-                      >
-                        Free
-                      </label>
+                      <label htmlFor="price-free" className="ml-3 text-sm text-gray-700">Free</label>
                     </div>
                     <div className="flex items-center">
                       <input
@@ -264,12 +194,7 @@ const AllBooks = () => {
                         onChange={() => setPriceFilter("false")}
                         className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
                       />
-                      <label
-                        htmlFor="price-paid"
-                        className="ml-3 text-sm text-gray-700"
-                      >
-                        Paid
-                      </label>
+                      <label htmlFor="price-paid" className="ml-3 text-sm text-gray-700">Paid</label>
                     </div>
                   </div>
                 </div>
@@ -284,7 +209,7 @@ const AllBooks = () => {
             </div>
           </div>
 
-          {/* Books Grid */}
+          {/* Book List */}
           <div className="lg:col-span-3">
             {loading ? (
               <div className="flex justify-center items-center h-64">
@@ -293,22 +218,14 @@ const AllBooks = () => {
             ) : error ? (
               <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-6">
                 <div className="flex">
-                  <div className="flex-shrink-0">
-                    <X className="h-5 w-5 text-red-400" />
-                  </div>
-                  <div className="ml-3">
-                    <p className="text-sm text-red-700">{error}</p>
-                  </div>
+                  <div className="flex-shrink-0"><X className="h-5 w-5 text-red-400" /></div>
+                  <div className="ml-3"><p className="text-sm text-red-700">{error}</p></div>
                 </div>
               </div>
             ) : books.length === 0 ? (
               <div className="bg-white rounded-lg shadow-md p-8 text-center">
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  No books found
-                </h3>
-                <p className="text-gray-500 mb-4">
-                  Try adjusting your filters or search criteria.
-                </p>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No books found</h3>
+                <p className="text-gray-500 mb-4">Try adjusting your filters or search criteria.</p>
                 <button
                   onClick={clearFilters}
                   className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200"
@@ -326,31 +243,20 @@ const AllBooks = () => {
                     >
                       <div className="h-48 overflow-hidden">
                         <img
-                          src={
-                            book.coverImage ||
-                            "/placeholder.svg?height=300&width=400"
-                          }
+                          src={book.coverImage || "/placeholder.svg?height=300&width=400"}
                           alt={book.title}
                           className="w-full h-full object-cover"
                         />
                       </div>
                       <div className="p-6">
                         <div className="flex justify-between items-start">
-                          <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                            {book.title}
-                          </h3>
-                          <span
-                            className={`px-2 py-1 text-xs font-medium rounded-full ${book.isFree ? "bg-green-100 text-green-800" : "bg-indigo-100 text-indigo-800"}`}
-                          >
-                            Free
+                          <h3 className="text-lg font-semibold text-gray-900 mb-2">{book.title}</h3>
+                          <span className={`px-2 py-1 text-xs font-medium rounded-full ${book.isFree ? "bg-green-100 text-green-800" : "bg-indigo-100 text-indigo-800"}`}>
+                            {book.isFree ? "Free" : "Paid"}
                           </span>
                         </div>
-                        <p className="text-sm text-gray-600 mb-2">
-                          By {book.author}
-                        </p>
-                        <p className="text-sm text-gray-500 mb-4 line-clamp-2">
-                          {book.description}
-                        </p>
+                        <p className="text-sm text-gray-600 mb-2">By {book.author}</p>
+                        <p className="text-sm text-gray-500 mb-4 line-clamp-2">{book.description}</p>
                         <div className="flex justify-between items-center">
                           <div className="flex items-center">
                             <Star className="h-4 w-4 text-yellow-400" />
@@ -373,10 +279,7 @@ const AllBooks = () => {
                 {/* Pagination */}
                 {pagination.pages > 1 && (
                   <div className="flex justify-center mt-8">
-                    <nav
-                      className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
-                      aria-label="Pagination"
-                    >
+                    <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
                       <button
                         onClick={() => handlePageChange(pagination.page - 1)}
                         disabled={pagination.page === 1}
